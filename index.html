@@ -1,0 +1,63 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row =>
+                    row.some(cell => cell !== '' && cell !== null && cell !== undefined)
+                );
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS MCQ Quiz</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>AWS Cloud Practitioner MCQ Quiz</h1>
+        <div id="start-screen">
+            <label for="question-count">Number of Questions (1-128, or 0 for all):</label>
+            <input type="number" id="question-count" min="0" max="128" value="10">
+            <button id="start-btn">Start Quiz</button>
+        </div>
+        <div id="quiz" class="quiz hidden">
+            <div id="question-container" class="question-container"></div>
+            <div id="options-container" class="options-container"></div>
+            <button id="next-btn" class="next-btn" disabled>Submit</button>
+            <div id="result" class="result"></div>
+            <div id="score" class="score">Score: 0/0</div>
+        </div>
+        <div id="results-screen" class="hidden">
+            <h2>Quiz Results</h2>
+            <p id="final-score"></p>
+            <h3>Category Performance</h3>
+            <ul id="category-results"></ul>
+            <button id="restart-btn">Restart Quiz</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
